@@ -41,7 +41,7 @@ jobs:
      - uses: gruntwork-io/terragrunt-action@v2
        id: plan
        env:
-         TF_WORKSPACE: ${{ github.ref_name }}
+         TF_WORKSPACE: platafomr-${{ github.ref_name }}
        with:
          tf_version: "1.5.7"
          tg_version: "0.53.2"
