@@ -53,4 +53,4 @@ jobs:
          tg_version: "0.53.2"
          tg_dir: "./environment/${{ github.ref_name }}"
          tg_command: "apply"
-         tg_add_approve: 1 
+         tg_add_approve: 1  
