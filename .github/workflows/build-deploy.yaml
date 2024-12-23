@@ -31,6 +31,14 @@ jobs:
          aws-region: ${{ vars.AWS_REGION }}
 
      - uses: gruntwork-io/terragrunt-action@v2
+       id: init
+       with:
+        tf_version: "1.5.7"
+        tg_version: "0.53.2"
+        tg_dir: "./environment/${{ github.ref_name }}"
+        tg_command: "init"  # Primero hacemos un init         
+
+     - uses: gruntwork-io/terragrunt-action@v2
        id: plan
        env:
          TF_WORKSPACE: ${{ github.ref_name }}
