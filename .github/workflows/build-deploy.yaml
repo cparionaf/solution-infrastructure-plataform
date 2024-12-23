@@ -1,33 +1,50 @@
 name: Terragrunt Deployment
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-      - dev
+ workflow_dispatch:
+ push:
+   branches:
+     - main
+     - dev
 
 permissions:
-  id-token: write
-  contents: read
+ id-token: write
+ contents: read
 
 env:
-  TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+ TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+ TF_IN_AUTOMATION: true
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+ deploy:
+   name: 'Deploy Infrastructure'
+   runs-on: ubuntu-latest
+   environment: ${{ github.ref_name }}
+   
+   steps:
+     - uses: actions/checkout@v4
 
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
+     - uses: aws-actions/configure-aws-credentials@v4
+       with:
+         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+         aws-region: ${{ vars.AWS_REGION }}
 
-      - uses: gruntwork-io/terragrunt-action@v2
-        with:
-          tf_version: "1.5.7"
-          tg_version: "0.53.2"
-          tg_command: 'run-all apply --non-interactive --working-dir ./environment/main'
+     - uses: gruntwork-io/terragrunt-action@v2
+       id: plan
+       env:
+         TF_WORKSPACE: ${{ github.ref_name }}
+       with:
+         tf_version: "1.5.7"
+         tg_version: "0.53.2"
+         tg_command: 'run-all plan --working-dir ./environment/${{ github.ref_name }}'
+
+     - uses: gruntwork-io/terragrunt-action@v2
+       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+       env:
+         TF_WORKSPACE: ${{ github.ref_name }}
+       with:
+         tf_version: "1.5.7"
+         tg_version: "0.53.2"
+         tg_command: 'run-all apply --non-interactive --working-dir ./environment/${{ github.ref_name }}'
+         tg_add_approve: 1
