@@ -33,6 +33,7 @@ jobs:
         uses: gruntwork-io/terragrunt-action@v2
         env:
           TF_WORKSPACE: ${{ github.ref_name }}
+          TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
         with:
           tf_version: "1.5.7"
           tg_version: "0.53.2"
@@ -43,6 +44,7 @@ jobs:
         uses: gruntwork-io/terragrunt-action@v2
         env:
           TF_WORKSPACE: ${{ github.ref_name }}
+          TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
         with:
           tf_version: "1.5.7"
           tg_version: "0.53.2"
