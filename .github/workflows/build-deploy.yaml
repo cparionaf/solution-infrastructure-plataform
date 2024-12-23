@@ -37,8 +37,8 @@ jobs:
        with:
          tf_version: "1.5.7"
          tg_version: "0.53.2"
-         tg_command: 'run-all plan --working-dir ./environment/${{ github.ref_name }}'
-
+         tg_dir: "./environment/${{ github.ref_name }}"
+         tg_command: "plan"
      - uses: gruntwork-io/terragrunt-action@v2
        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
        env:
@@ -46,5 +46,6 @@ jobs:
        with:
          tf_version: "1.5.7"
          tg_version: "0.53.2"
-         tg_command: 'run-all apply --non-interactive --working-dir ./environment/${{ github.ref_name }}'
+         tg_dir: "./environment/${{ github.ref_name }}"
+         tg_command: "apply"
          tg_add_approve: 1
