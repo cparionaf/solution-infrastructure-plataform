@@ -40,8 +40,6 @@ jobs:
 
      - uses: gruntwork-io/terragrunt-action@v2
        id: plan
-       env:
-         TF_WORKSPACE: plataform-${{ github.ref_name }}
        with:
          tf_version: "1.5.7"
          tg_version: "0.53.2"
@@ -49,8 +47,6 @@ jobs:
          tg_command: "plan"
      - uses: gruntwork-io/terragrunt-action@v2
        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
-       env:
-         TF_WORKSPACE: plataform-${{ github.ref_name }}
        with:
          tf_version: "1.5.7"
          tg_version: "0.53.2"
