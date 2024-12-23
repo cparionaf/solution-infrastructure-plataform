@@ -1,4 +1,7 @@
-variable "aws_region" {
+variable "environment" {
   type = string
-  default = "us-east-1"
+}
+
+variable "single_nat_gateway" {
+  type = string
 }
