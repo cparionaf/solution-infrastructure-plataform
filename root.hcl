@@ -1,72 +1,54 @@
-locals {
-  # Basic project information
-  project_name       = "solutions-architecture-moc"
-  organization_name  = "cparionaf"
-  role_prefix        = "plataform"
-
-  # Dynamically determine the environment based on directory structure
-  environment = basename(dirname(dirname(get_original_terragrunt_dir())))
-
-  # Default region configuration
-  aws_region = "us-east-1"
-
-  # Common tags for resources
-  common_tags = {
-    Project     = local.project_name
-    Environment = local.environment
-    ManagedBy   = "Terragrunt"
-    Repository  = "solution-architecture-moc"
+# Backend configuration
+remote_state {
+  backend = "s3"
+  generate = {
+    path      = "backend.tf"
+    if_exists = "overwrite"
   }
-}
-
-# Terraform Cloud workspace configuration
-generate "cloud" {
-  path      = "cloud.tf"
-  if_exists = "overwrite_terragrunt"
-  contents  = <<EOF
-terraform {
-  cloud {
-    organization = "${local.organization_name}"
-    workspaces {
-      name = "${local.role_prefix}-${local.environment}"
+  config = {
+    bucket         = "protecta-${get_aws_account_id()}-devsecops-terraform-state"
+    # Project, Subproject, Environment, Component
+    key            = "infrastructure/${path_relative_to_include()}/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "protecta-devops-terraform-locks"
+    
+    # Configuraciones recomendadas para el bucket
+    s3_bucket_tags = {
+      Owner       = "Infrastructure Team"
+      Project     = "DevSecOps"
+      ManagedBy     = "Terraform"
+    }
+    
+    # Configuraciones recomendadas para la tabla DynamoDB
+    dynamodb_table_tags = {
+      Owner       = "Infrastructure Team"
+      Project     = "DevSecOps"
+      ManagedBy     = "Terraform"
     }
   }
 }
-EOF
-}
 
-# Provider configuration
+# Configure the AWS provider
+
 generate "provider" {
-  path      = "provider.tf"
+  path = "provider.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = <<EOF
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 4.48.0"
-    }
-  }
-}
-
-# Define AWS region as a variable
-variable "aws_region" {
-  description = "AWS region for deployment"
-  type        = string
-  default     = "${local.aws_region}"
-}
-
+  contents = <<EOF
 provider "aws" {
-  region = var.aws_region
+  region = "us-east-1"
 }
 EOF
 }
 
-# Input variables to pass to Terraform modules
-inputs = {
-  project_name       = local.project_name
-  organization_name  = local.organization_name
-  environment        = local.environment
-  aws_region         = local.aws_region
-  common_tags        = local.common_tags
+# Shared Inputs of the project
+
+inputs = {  
+    region = "us-east-1"
+    tags = {
+    Environment = ""
+    Project     = "DevSecOps"
+    Owner       = "Infrastructure Team"
+    Managed     = "Terragrunt"
+  }
 }
